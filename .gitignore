@@ -1,0 +1,7 @@
+node_modules/
+uploads/
+public/attach-note/
+config.env/
+.env/
+frontend/
+scripts/
