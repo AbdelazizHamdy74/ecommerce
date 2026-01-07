@@ -44,6 +44,21 @@ exports.getByUser = asyncHandler(async (req, res) => {
 
 exports.deleteAddress = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  const requester = req.user;
+
+  const address = await Address.getAddressById(id);
+  if (!address) {
+    return res.status(404).json({ message: "Address not found" });
+  }
+
+  if (
+    requester &&
+    requester.role !== "Admin" &&
+    requester.id !== address.user_id
+  ) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+
   await Address.deleteAddress(id);
   res.status(200).json({ message: "Address deleted" });
 });

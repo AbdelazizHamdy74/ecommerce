@@ -41,6 +41,21 @@ exports.getByUser = asyncHandler(async (req, res) => {
 
 exports.deletePaymentMethod = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  const requester = req.user;
+
+  const paymentMethod = await Payment.getPaymentMethodById(id);
+  if (!paymentMethod) {
+    return res.status(404).json({ message: "Payment method not found" });
+  }
+
+  if (
+    requester &&
+    requester.role !== "Admin" &&
+    requester.id !== paymentMethod.user_id
+  ) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+
   await Payment.deletePaymentMethod(id);
   res.status(200).json({ message: "Payment method deleted" });
 });

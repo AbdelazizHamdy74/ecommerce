@@ -6,6 +6,10 @@ const asyncHandler = require("express-async-handler");
 
 // Get all users
 exports.getAllUsers = asyncHandler(async (req, res) => {
+  const requester = req.user;
+  if (!requester || requester.role !== "Admin") {
+    return res.status(403).json({ message: "Forbidden" });
+  }
   const users = await UserModel.getAllUsers();
   res.status(200).json(users);
 });
@@ -13,6 +17,10 @@ exports.getAllUsers = asyncHandler(async (req, res) => {
 // Get user by ID
 exports.getUserById = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  const requester = req.user;
+  if (requester && requester.role !== "Admin" && requester.id !== id) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
   const user = await UserModel.getUserById(id);
   if (!user) {
     return res.status(404).json({ message: "User not found" });
@@ -23,6 +31,10 @@ exports.getUserById = asyncHandler(async (req, res) => {
 // Update user
 exports.updateUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  const requester = req.user;
+  if (requester && requester.role !== "Admin" && requester.id !== id) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
   const userData = req.body;
   await UserModel.updateUser(id, userData);
   res.status(200).json({ message: "User updated successfully" });
@@ -31,6 +43,10 @@ exports.updateUser = asyncHandler(async (req, res) => {
 // Soft delete user
 exports.deleteUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  const requester = req.user;
+  if (requester && requester.role !== "Admin" && requester.id !== id) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
   await UserModel.softDeleteUser(id);
   res.status(200).json({ message: "User deleted successfully" });
 });
@@ -38,6 +54,10 @@ exports.deleteUser = asyncHandler(async (req, res) => {
 // restore user
 exports.restoreUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  const requester = req.user;
+  if (!requester || requester.role !== "Admin") {
+    return res.status(403).json({ message: "Forbidden" });
+  }
   const user = await UserModel.restoreUser(id);
   if (!user) {
     return res
